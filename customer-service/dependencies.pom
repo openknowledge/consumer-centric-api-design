@@ -40,11 +40,13 @@
             <classifier>runner</classifier>
             <scope>provided</scope>
         </dependency>
+        <!-- validation -->
         <dependency>
             <groupId>org.apache.geronimo.specs</groupId>
             <artifactId>geronimo-validation_1.0_spec</artifactId>
             <version>1.1</version>
         </dependency>
+        <!-- config -->
         <dependency>
             <groupId>org.eclipse.microprofile.config</groupId>
             <artifactId>microprofile-config-api</artifactId>
@@ -55,6 +57,33 @@
             <artifactId>geronimo-config-impl</artifactId>
             <version>1.2.2</version>
         </dependency>
+        <!-- openapi -->
+        <dependency>
+            <groupId>org.microprofile-ext.openapi-ext</groupId>
+            <artifactId>swagger-ui</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.microprofile.openapi</groupId>
+            <artifactId>microprofile-openapi-api</artifactId>
+            <version>1.1.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.10.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo</groupId>
+            <artifactId>geronimo-openapi-impl</artifactId>
+            <version>1.0.11</version>
+        </dependency>
+        <!-- commons -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>

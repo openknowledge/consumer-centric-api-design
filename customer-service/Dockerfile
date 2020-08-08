@@ -3,7 +3,8 @@ FROM maven:3.6.3-jdk-11-openj9 AS mvn
 WORKDIR /usr/src/customer-service
 COPY dependencies.pom ./pom.xml
 RUN mvn package dependency:go-offline # cache dependencies
-COPY pom.xml src ./
+COPY pom.xml ./
+COPY src ./src
 RUN mvn package
 
 FROM openjdk:11
