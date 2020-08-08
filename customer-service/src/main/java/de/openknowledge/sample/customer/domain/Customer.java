@@ -24,7 +24,7 @@ import de.openknowledge.sample.address.domain.Address;
 
 public class Customer {
 
-	CustomerNumber number;
+    CustomerNumber number;
     private CustomerName name;
     private Address billingAddress;
     private Address deliveryAddress;
