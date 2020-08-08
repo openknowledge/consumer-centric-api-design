@@ -19,15 +19,12 @@ import static org.apache.commons.lang3.Validate.notNull;
 
 import javax.json.bind.annotation.JsonbCreator;
 import javax.json.bind.annotation.JsonbProperty;
-import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import de.openknowledge.sample.address.domain.Address;
 
 public class Customer {
 
-    @JsonbTypeAdapter(CustomerNumber.Adapter.class)
-    CustomerNumber number;
-    @JsonbTypeAdapter(CustomerName.Adapter.class)
+	CustomerNumber number;
     private CustomerName name;
     private Address billingAddress;
     private Address deliveryAddress;
