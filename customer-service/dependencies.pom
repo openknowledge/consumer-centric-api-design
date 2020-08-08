@@ -18,8 +18,8 @@
     <packaging>war</packaging>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <failOnMissingWebXml>false</failOnMissingWebXml>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <meecrowave.version>1.2.9</meecrowave.version>
@@ -31,6 +31,13 @@
             <groupId>org.apache.meecrowave</groupId>
             <artifactId>meecrowave-specs-api</artifactId>
             <version>${meecrowave.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.meecrowave</groupId>
+            <artifactId>meecrowave-core</artifactId>
+            <version>${meecrowave.version}</version>
+            <classifier>runner</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -56,31 +63,11 @@
     </dependencies>
 
     <build>
+        <finalName>customer-service</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-runner</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>org.apache.meecrowave</groupId>
-                                    <artifactId>meecrowave-core</artifactId>
-                                    <version>${meecrowave.version}</version>
-                                    <classifier>runner</classifier>
-                                </artifactItem>
-                            </artifactItems>
-                            <outputDirectory>${project.build.directory}/runner</outputDirectory>
-                            <stripVersion>true</stripVersion>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
