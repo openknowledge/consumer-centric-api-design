@@ -34,8 +34,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import de.openknowledge.sample.address.domain.BillingAddressRepository;
-import de.openknowledge.sample.address.domain.DeliveryAddressRepository;
 import de.openknowledge.sample.customer.domain.Customer;
 import de.openknowledge.sample.customer.domain.CustomerNumber;
 import de.openknowledge.sample.customer.domain.CustomerRepository;
@@ -53,10 +51,6 @@ public class CustomerResource {
 
     @Inject
     private CustomerRepository customerRepository;
-    @Inject
-    private BillingAddressRepository billingAddressRepository;
-    @Inject
-    private DeliveryAddressRepository deliveryAddressRepository;
 
     @GET
     @Path("/")
@@ -81,8 +75,6 @@ public class CustomerResource {
     public Customer getCustomer(@PathParam("customerNumber") CustomerNumber customerNumber) {
         LOG.info("RESTful call 'GET customer'");
         Customer customer = customerRepository.find(customerNumber).orElseThrow(customerNotFound(customerNumber));
-        billingAddressRepository.find(customerNumber).ifPresent(customer::setBillingAddress);
-        deliveryAddressRepository.find(customerNumber).ifPresent(customer::setDeliveryAddress);
         return customer;
     }
 
