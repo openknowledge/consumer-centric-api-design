@@ -6,4 +6,27 @@ services:
       context: ./customer-service
     container_name: customer-service
     ports:
-      - "8080:8080"
+      - "4000:8080"
+    environment:
+      - BILLING_SERVICE_URL=http://billing:8080
+      - DELIVERY_SERVICE_URL=http://delivery:8080
+  billing:
+    build:
+      context: ./billing-service
+    container_name: billing-service
+    ports:
+      - "4001:8080"
+  delivery:
+    build:
+      context: ./delivery-service
+    container_name: delivery-service
+    ports:
+      - "4002:8080"
+    environment:
+      - ADDRESS_VALIDATION_SERVICE_URL=http://address-validation:8080
+  address-validation:
+    build:
+      context: ./address-validation-service
+    container_name: address-validation-service
+    ports:
+      - "4003:8080"

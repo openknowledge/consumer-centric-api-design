@@ -26,6 +26,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -34,6 +35,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import de.openknowledge.sample.address.domain.Address;
+import de.openknowledge.sample.address.domain.BillingAddressRepository;
+import de.openknowledge.sample.address.domain.DeliveryAddressRepository;
 import de.openknowledge.sample.customer.domain.Customer;
 import de.openknowledge.sample.customer.domain.CustomerNumber;
 import de.openknowledge.sample.customer.domain.CustomerRepository;
@@ -51,6 +55,10 @@ public class CustomerResource {
 
     @Inject
     private CustomerRepository customerRepository;
+    @Inject
+    private BillingAddressRepository billingAddressRepository;
+    @Inject
+    private DeliveryAddressRepository deliveryAddressRepository;
 
     @GET
     @Path("/")
@@ -75,7 +83,28 @@ public class CustomerResource {
     public Customer getCustomer(@PathParam("customerNumber") CustomerNumber customerNumber) {
         LOG.info("RESTful call 'GET customer'");
         Customer customer = customerRepository.find(customerNumber).orElseThrow(customerNotFound(customerNumber));
+        billingAddressRepository.find(customerNumber).ifPresent(customer::setBillingAddress);
+        deliveryAddressRepository.find(customerNumber).ifPresent(customer::setDeliveryAddress);
         return customer;
+    }
+
+    @PUT
+    @Path("/{customerNumber}/billing-address")
+    @Produces(MediaType.APPLICATION_JSON)
+    public void setBillingAddress(@PathParam("customerNumber") CustomerNumber customerNumber, Address billingAddress) {
+        LOG.info("RESTful call 'PUT billing address'");
+        customerRepository.find(customerNumber).orElseThrow(customerNotFound(customerNumber));
+        billingAddressRepository.update(customerNumber, billingAddress);
+    }
+
+    @PUT
+    @Path("/{customerNumber}/delivery-address")
+    @Produces(MediaType.APPLICATION_JSON)
+    public void setDeliveryAddress(@PathParam("customerNumber") CustomerNumber customerNumber,
+            Address deliveryAddress) {
+        LOG.info("RESTful call 'PUT delivery address'");
+        customerRepository.find(customerNumber).orElseThrow(customerNotFound(customerNumber));
+        deliveryAddressRepository.update(customerNumber, deliveryAddress);
     }
 
     private Supplier<NotFoundException> customerNotFound(CustomerNumber number) {

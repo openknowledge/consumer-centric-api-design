@@ -33,6 +33,7 @@ import javax.ws.rs.core.UriInfo;
 
 import de.openknowledge.sample.address.domain.Address;
 import de.openknowledge.sample.address.domain.AddressRepository;
+import de.openknowledge.sample.address.domain.AddressValidationService;
 import de.openknowledge.sample.address.domain.CustomerNumber;
 
 /**
@@ -44,8 +45,10 @@ import de.openknowledge.sample.address.domain.CustomerNumber;
 @Produces(MediaType.APPLICATION_JSON)
 public class AddressResource {
 
-    private final static Logger LOGGER = Logger.getLogger(AddressResource.class.getSimpleName());
+    private static final Logger LOG = Logger.getLogger(AddressResource.class.getSimpleName());
 
+    @Inject
+    private AddressValidationService addressValidationService;
     @Inject
     private AddressRepository addressesRepository;
 
@@ -53,7 +56,7 @@ public class AddressResource {
     @Path("/{customerNumber}")
     @Produces(MediaType.APPLICATION_JSON)
     public Address getAddress(@PathParam("customerNumber") CustomerNumber number) {
-        LOGGER.info("RESTful call 'GET address'");
+        LOG.info("RESTful call 'GET address'");
         return addressesRepository.find(number).orElseThrow(NotFoundException::new);
     }
 
@@ -62,7 +65,8 @@ public class AddressResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response setAddress(@PathParam("customerNumber") CustomerNumber customerNumber, Address address,
             @Context UriInfo uri) {
-        LOGGER.info("RESTful call 'POST address'");
+        LOG.info("RESTful call 'POST address'");
+        addressValidationService.validate(address);
         addressesRepository.update(customerNumber, address);
         return Response.ok().build();
     }
