@@ -41,8 +41,6 @@ services:
     environment:
       - KEYCLOAK_USER=admin
       - KEYCLOAK_PASSWORD=admin123
-    volumes:
-      - ./keycloak/:/opt/jboss/keycloak/standalone/data/
     ports:
       - "9191:8080"
 
