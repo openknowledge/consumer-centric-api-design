@@ -15,6 +15,10 @@
  */
 package de.openknowledge.sample.customer.application;
 
+import static org.eclipse.microprofile.openapi.annotations.enums.SchemaType.ARRAY;
+import static org.eclipse.microprofile.openapi.annotations.enums.SchemaType.DEFAULT;
+import static org.eclipse.microprofile.openapi.annotations.enums.SchemaType.OBJECT;
+
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.function.Supplier;
@@ -34,6 +38,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 
 import de.openknowledge.sample.address.domain.Address;
 import de.openknowledge.sample.address.domain.BillingAddressRepository;
@@ -63,6 +72,7 @@ public class CustomerResource {
     @GET
     @Path("/")
     @Produces(MediaType.APPLICATION_JSON)
+    @APIResponse(content = @Content(schema = @Schema(type = ARRAY, ref = "#/components/schemas/SimpleCustomer")))
     public List<Customer> getCustomers() {
         LOG.info("RESTful call 'GET all customers'");
         return customerRepository.findAll();
@@ -71,6 +81,7 @@ public class CustomerResource {
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
+    @RequestBody(content = @Content(schema = @Schema(ref = "#/components/schemas/SimpleCustomer")))
     public Response createCustomer(Customer customer, @Context UriInfo uri) throws URISyntaxException {
         LOG.info("RESTful call 'POST new customer'");
         customerRepository.persist(customer);
@@ -80,6 +91,7 @@ public class CustomerResource {
     @GET
     @Path("/{customerNumber}")
     @Produces(MediaType.APPLICATION_JSON)
+    @APIResponse(content = @Content(schema = @Schema(type = OBJECT, ref = "#/components/schemas/Customer")))
     public Customer getCustomer(@PathParam("customerNumber") CustomerNumber customerNumber) {
         LOG.info("RESTful call 'GET customer'");
         Customer customer = customerRepository.find(customerNumber).orElseThrow(customerNotFound(customerNumber));
@@ -91,6 +103,8 @@ public class CustomerResource {
     @PUT
     @Path("/{customerNumber}/billing-address")
     @Produces(MediaType.APPLICATION_JSON)
+    @RequestBody(content = @Content(schema = @Schema(ref = "#/components/schemas/Address")))
+    @APIResponse(responseCode = "204", content = @Content(schema = @Schema(type = DEFAULT)))
     public void setBillingAddress(@PathParam("customerNumber") CustomerNumber customerNumber, Address billingAddress) {
         LOG.info("RESTful call 'PUT billing address'");
         customerRepository.find(customerNumber).orElseThrow(customerNotFound(customerNumber));
@@ -100,6 +114,8 @@ public class CustomerResource {
     @PUT
     @Path("/{customerNumber}/delivery-address")
     @Produces(MediaType.APPLICATION_JSON)
+    @RequestBody(content = @Content(schema = @Schema(ref = "#/components/schemas/Address")))
+    @APIResponse(responseCode = "204", content = @Content(schema = @Schema(type = DEFAULT)))
     public void setDeliveryAddress(@PathParam("customerNumber") CustomerNumber customerNumber,
             Address deliveryAddress) {
         LOG.info("RESTful call 'PUT delivery address'");
