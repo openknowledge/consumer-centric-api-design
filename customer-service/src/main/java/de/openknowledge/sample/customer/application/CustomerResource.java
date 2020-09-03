@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -80,6 +81,7 @@ public class CustomerResource {
 
     @POST
     @Path("/")
+    @RolesAllowed("admin")
     @Consumes(MediaType.APPLICATION_JSON)
     @RequestBody(content = @Content(schema = @Schema(ref = "#/components/schemas/SimpleCustomer")))
     public Response createCustomer(Customer customer, @Context UriInfo uri) throws URISyntaxException {

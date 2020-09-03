@@ -74,6 +74,16 @@
             <version>1.2.2</version>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.microprofile.jwt</groupId>
+            <artifactId>microprofile-jwt-auth-api</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo</groupId>
+            <artifactId>geronimo-jwt-auth</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.9</version>
@@ -108,14 +118,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-
-<plugin>
-  <groupId>org.apache.meecrowave</groupId>
-  <artifactId>meecrowave-maven-plugin</artifactId>
-  <version>${meecrowave.version}</version>
-</plugin>
-
         </plugins>
     </build>
 </project>
