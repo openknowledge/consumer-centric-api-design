@@ -27,6 +27,7 @@ import javax.ws.rs.ext.Provider;
 @ApplicationScoped
 public class ValidationExceptionHandler implements ExceptionMapper<ValidationException> {
 
+    private static final int UNPROCESSABLE_ENTITY = 422;
     private static final String PROBLEM_JSON_TYPE = "application/problem+json";
     private static final String PROBLEM_JSON
         = "{\"type\": \"%s\", \"title\": \"%s\", \"status\": %d, \"detail\": \"%s\", \"instance\": \"%s\"}";
@@ -36,7 +37,7 @@ public class ValidationExceptionHandler implements ExceptionMapper<ValidationExc
 
     @Override
     public Response toResponse(ValidationException exception) {
-        return Response.status(Response.Status.BAD_REQUEST)
+        return Response.status(UNPROCESSABLE_ENTITY)
                 .type(PROBLEM_JSON_TYPE)
                 .entity(String.format(
                         PROBLEM_JSON,

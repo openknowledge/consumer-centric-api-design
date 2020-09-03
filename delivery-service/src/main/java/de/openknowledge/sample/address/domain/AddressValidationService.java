@@ -10,9 +10,11 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.validation.ValidationException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -20,6 +22,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 public class AddressValidationService {
 
     private static final Logger LOG = Logger.getLogger(AddressValidationService.class.getSimpleName());
+    private static final int UNPROCESSABLE_ENTITY = 422;
     private static final String ADDRESS_VALIDATION_PATH = "valid-addresses";
 
     @Inject
@@ -33,10 +36,12 @@ public class AddressValidationService {
                 .path(ADDRESS_VALIDATION_PATH)
                 .request(MediaType.APPLICATION_JSON)
                 .post(entity(address, MediaType.APPLICATION_JSON_TYPE));
-        if (validationResult.getStatus() != Response.Status.OK.getStatusCode()) {
+        if (validationResult.getStatus() == UNPROCESSABLE_ENTITY) {
             LOG.info("validation failed");
             JsonObject problem = Json.createReader(new StringReader(validationResult.readEntity(String.class))).readObject();
             throw new ValidationException(problem.getString("detail"));
+        } else if (validationResult.getStatusInfo().getFamily().ordinal() >= Family.CLIENT_ERROR.ordinal()) {
+            throw new WebApplicationException(validationResult.getStatusInfo().getFamily().ordinal() * 100); // hide direct cause
         }
     }
 }
