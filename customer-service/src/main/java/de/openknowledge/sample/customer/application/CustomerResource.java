@@ -21,6 +21,7 @@ import static org.eclipse.microprofile.openapi.annotations.enums.SchemaType.OBJE
 
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
@@ -28,6 +29,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.GET;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.POST;
@@ -40,6 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
@@ -49,6 +52,7 @@ import de.openknowledge.sample.address.domain.Address;
 import de.openknowledge.sample.address.domain.BillingAddressRepository;
 import de.openknowledge.sample.address.domain.DeliveryAddressRepository;
 import de.openknowledge.sample.customer.domain.Customer;
+import de.openknowledge.sample.customer.domain.CustomerName;
 import de.openknowledge.sample.customer.domain.CustomerNumber;
 import de.openknowledge.sample.customer.domain.CustomerRepository;
 
@@ -69,9 +73,12 @@ public class CustomerResource {
     private BillingAddressRepository billingAddressRepository;
     @Inject
     private DeliveryAddressRepository deliveryAddressRepository;
+    @Inject
+    private JsonWebToken token;
 
     @GET
     @Path("/")
+    @RolesAllowed({ "admin", "user" })
     @Produces(MediaType.APPLICATION_JSON)
     @APIResponse(content = @Content(schema = @Schema(type = ARRAY, ref = "#/components/schemas/SimpleCustomer")))
     public List<Customer> getCustomers() {
@@ -91,6 +98,7 @@ public class CustomerResource {
     }
 
     @GET
+    @RolesAllowed("user")
     @Path("/{customerNumber}")
     @Produces(MediaType.APPLICATION_JSON)
     @APIResponse(content = @Content(schema = @Schema(type = OBJECT, ref = "#/components/schemas/Customer")))
@@ -103,26 +111,37 @@ public class CustomerResource {
     }
 
     @PUT
+    @RolesAllowed("user")
     @Path("/{customerNumber}/billing-address")
     @Produces(MediaType.APPLICATION_JSON)
     @RequestBody(content = @Content(schema = @Schema(ref = "#/components/schemas/Address")))
     @APIResponse(responseCode = "204", content = @Content(schema = @Schema(type = DEFAULT)))
     public void setBillingAddress(@PathParam("customerNumber") CustomerNumber customerNumber, Address billingAddress) {
+        checkAccess(customerNumber);
         LOG.info("RESTful call 'PUT billing address'");
-        customerRepository.find(customerNumber).orElseThrow(customerNotFound(customerNumber));
         billingAddressRepository.update(customerNumber, billingAddress);
     }
 
     @PUT
+    @RolesAllowed("user")
     @Path("/{customerNumber}/delivery-address")
     @Produces(MediaType.APPLICATION_JSON)
     @RequestBody(content = @Content(schema = @Schema(ref = "#/components/schemas/Address")))
     @APIResponse(responseCode = "204", content = @Content(schema = @Schema(type = DEFAULT)))
     public void setDeliveryAddress(@PathParam("customerNumber") CustomerNumber customerNumber,
             Address deliveryAddress) {
+        checkAccess(customerNumber);
         LOG.info("RESTful call 'PUT delivery address'");
-        customerRepository.find(customerNumber).orElseThrow(customerNotFound(customerNumber));
         deliveryAddressRepository.update(customerNumber, deliveryAddress);
+    }
+
+    private void checkAccess(CustomerNumber customerNumber) {
+        LOG.info("Check access for customer");
+        Optional<Customer> customer = customerRepository.find(customerNumber);
+        String userName = customer.map(Customer::getName).map(CustomerName::toUserName).orElseThrow(customerNotFound(customerNumber));
+        if (!userName.equals(token.getName())) {
+            throw new ForbiddenException();
+        }
     }
 
     private Supplier<NotFoundException> customerNotFound(CustomerNumber number) {

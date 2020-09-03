@@ -19,10 +19,13 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
+import org.eclipse.microprofile.auth.LoginConfig;
+
 /**
  * Application initialization
  */
 @ApplicationScoped
 @ApplicationPath("/")
+@LoginConfig(authMethod = "MP-JWT")
 public class AddressApplication extends Application {
 }

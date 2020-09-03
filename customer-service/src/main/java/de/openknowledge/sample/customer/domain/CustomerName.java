@@ -15,12 +15,12 @@
  */
 package de.openknowledge.sample.customer.domain;
 
+import static org.apache.commons.lang3.Validate.notBlank;
+
 import javax.json.bind.adapter.JsonbAdapter;
 import javax.json.bind.annotation.JsonbTypeAdapter;
 
 import de.openknowledge.sample.customer.domain.CustomerName.Adapter;
-
-import static org.apache.commons.lang3.Validate.notBlank;
 
 @JsonbTypeAdapter(Adapter.class)
 public class CustomerName {
@@ -37,6 +37,10 @@ public class CustomerName {
 
     public CustomerName(String name) {
         this.name = notBlank(name, "name may not be empty").trim();
+    }
+
+    public String toUserName() {
+        return name.substring(0, name.indexOf(' ')).toLowerCase();
     }
 
     @Override
