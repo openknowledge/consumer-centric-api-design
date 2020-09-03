@@ -32,6 +32,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.microprofile.jwt.JsonWebToken;
+
 import de.openknowledge.sample.address.domain.Address;
 import de.openknowledge.sample.address.domain.AddressRepository;
 import de.openknowledge.sample.address.domain.AddressValidationService;
@@ -53,6 +55,8 @@ public class AddressResource {
     private AddressValidationService addressValidationService;
     @Inject
     private AddressRepository addressesRepository;
+    @Inject
+    private JsonWebToken token;
 
     @GET
     @Path("/{customerNumber}")
@@ -67,7 +71,7 @@ public class AddressResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response setAddress(@PathParam("customerNumber") CustomerNumber customerNumber, Address address,
             @Context UriInfo uri) {
-        LOG.info("RESTful call 'POST address'");
+        LOG.info(() -> "RESTful call 'POST address' by " + token.getName());
         addressValidationService.validate(address);
         addressesRepository.update(customerNumber, address);
         return Response.ok().build();

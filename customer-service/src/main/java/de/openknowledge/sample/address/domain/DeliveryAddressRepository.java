@@ -27,28 +27,36 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.validation.ValidationException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import de.openknowledge.sample.customer.domain.CustomerNumber;
+import de.openknowledge.sample.jwt.infrastructure.JwtClientFilter;
 
 @ApplicationScoped
 public class DeliveryAddressRepository {
 
     private static final Logger LOG = Logger.getLogger(DeliveryAddressRepository.class.getSimpleName());
+    private static final int UNPROCESSABLE_ENTITY = 422;
     private static final String DELIVERY_ADDRESSES_PATH = "delivery-addresses";
 
     @Inject
     @ConfigProperty(name = "delivery-service.url")
     String deliveryServiceUrl;
 
+    @Inject
+    JsonWebToken token;
+
     public Optional<Address> find(CustomerNumber customerNumber) {
         LOG.info("load delivery address from " + deliveryServiceUrl);
         return Optional.of(ClientBuilder
                 .newClient()
+                .register(new JwtClientFilter(token))
                 .target(deliveryServiceUrl)
                 .path(DELIVERY_ADDRESSES_PATH)
                 .path(customerNumber.toString())
@@ -63,6 +71,7 @@ public class DeliveryAddressRepository {
         LOG.info("update delivery address at " + deliveryServiceUrl);
         Response response = ClientBuilder
                 .newClient()
+                .register(new JwtClientFilter(token))
                 .target(deliveryServiceUrl)
                 .path(DELIVERY_ADDRESSES_PATH)
                 .path(customerNumber.toString())
@@ -74,11 +83,11 @@ public class DeliveryAddressRepository {
     private void handleValidationError(Response response) {
         if (response.getStatus() == Response.Status.OK.getStatusCode()) {
             return;
+        } else if (response.getStatus() == UNPROCESSABLE_ENTITY) {
+            JsonObject problem = Json.createReader(new StringReader(response.readEntity(String.class))).readObject();
+            throw new ValidationException(problem.getString("detail"));
+        } else {
+            throw new WebApplicationException(response.getStatus());
         }
-        if (!response.hasEntity()) {
-            throw new ValidationException("invalid address");
-        }
-        JsonObject problem = Json.createReader(new StringReader(response.readEntity(String.class))).readObject();
-        throw new ValidationException(problem.getString("detail"));
     }
 }

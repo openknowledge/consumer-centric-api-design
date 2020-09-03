@@ -28,8 +28,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import de.openknowledge.sample.customer.domain.CustomerNumber;
+import de.openknowledge.sample.jwt.infrastructure.JwtClientFilter;
 
 @ApplicationScoped
 public class BillingAddressRepository {
@@ -41,10 +43,14 @@ public class BillingAddressRepository {
     @ConfigProperty(name = "billing-service.url")
     String billingServiceUrl;
 
+    @Inject
+    JsonWebToken token;
+
     public Optional<Address> find(CustomerNumber customerNumber) {
         LOG.info("load billing address from " + billingServiceUrl);
         return Optional.of(ClientBuilder
                 .newClient()
+                .register(new JwtClientFilter(token))
                 .target(billingServiceUrl)
                 .path(BILLING_ADDRESSES_PATH)
                 .path(customerNumber.toString())
@@ -59,6 +65,7 @@ public class BillingAddressRepository {
         LOG.info("update billing address at " + billingServiceUrl);
         ClientBuilder
                 .newClient()
+                .register(new JwtClientFilter(token))
                 .target(billingServiceUrl)
                 .path(BILLING_ADDRESSES_PATH)
                 .path(customerNumber.toString())
