@@ -1,73 +1,68 @@
-## Hands-On MicroProfile 
-#Hello "Customer"
-
-In unserer ersten Übung wollen wir uns den typischen Aufbau eines auf  MicroProfile 3.3 basierenden Microservices anschauen, sowie den Umgang mit der Workshop-Infrastruktur kennen lernen. 
+##Hands-On MicroProfile 
+#JWT Propagation API
+  
+Die MicroProfile API mit dem etwas komplizierten Namen [JWT RBAC](https://github.com/eclipse/microprofile-jwt-auth) 
+hilft dabei, auf Microservices basierende Anwendungen via JWT Token und rollenbasierter Zugriffskontrolle 
+(role based access control aka RBAC) abzusichern.   
 
 ##Szenario
 
-Die Fachlichkeit unserer Anwendung setzt sich aus verschiedenen Microservices zusammen. Den Einstieg in die Anwendung und somit eine Art API Gateway stellt der **Customer Service** dar. 
+In unserem Beispiel möchten wir die Möglichkeiten der JWT RBAC API dazu nutzen, den Zugriff auf die verschiedenen 
+Use-Cases unserer Anwendung zu beschränken. 
 
-Mit Hilfe des **Customer Service** kann entweder eine Übersicht aller Kunden oder aber die Details eines einzelnen Kunden abgefragt werden. Zu den Detail eines Kunden gehören u.a. die Lieferadresse sowie die Rechnungsadresse des Kunden. Zur Verwaltung der jeweiligenen Detailinformationen sowie der Abbildung der zugehörigen Fachlichkeit stehen dedizierte Services zur Verfügung. 
+Zur Verwaltung der Nutzer verwenden wir *Keycloak*. Ein Zugriff auf den Keycloak-Server ist nach dessen Start über 
+dessen Admin-Console möglich:
+                                                    
+    http://localhost:9090/auth/admin/
+    Username: admin
+    Password: admin123 
 
-Der **Billing Services** bietet die Fachlichkeit zur Abrechnung einer Bestellung gegenüber dem Kunden an und verwaltet dazu u.a. die Rechnungsadressen aller Kunden.  
+Folgende Nutzer sind initial neben dem Admin angelegt: 
+ * erika / erika123 (user)
+ * max / max123 (user)
+ * james / james123 (user)
+ 
+Während das Abfragen der Kundenliste für alle angemeldeten Nutzer erlaubt sein soll, dürfen nur Nutzer der Rolle *USER* 
+die Details einzelner Nutzer einsehen. Das Ändern von Liefer- und/oder Rechnungsadresse dagegen ist nur dem 
+jeweiligen Nutzer selbst gestattet.
+  
+ ##ToDos
 
-Der **Delivery Service** bietet die Fachlichkeit zur Auslieferung einer Bestellung an den Kunden an und verwaltet dazu u.a. die Lieferadressen aller Kunden. Da bei einer Lieferadresse sichergestellt werden muss, dass es die angegebene Adresse auch tatsächlich gibt, findet beim Anlegen und Ändern einer Lieferadresse eine zusätzliche Validierung statt. Die Aufgabe dieser fachlichen Validierung übernimmt der **Address Validation Service**.
+ In den folgenden Schritten wollen wir den Umgang mit JWT Tokens und der MicroProfile Autorisierung kennenlernen.  
 
-##ToDos
+ ###Step 1: JWT Token "organisieren"
+ 
+ Zum Abrufen des JWT Tokens, verwenden wir Keycloak mit dem folgenden Request (am Beispiel 'erika'): 
+ 
+    POST http://localhost:9090/auth/realms/master/protocol/openid-connect/token
+    
+    Headers: 
+        Content-Type: applicatiion/x-www-form-urlencoded
+    
+    Body:
+        grant_type      password
+        client_id       onlineshop
+        username        erika
+        password        erika123
+        
+###Step 2: JWT Token analysieren
 
-###Step 1: Anwendung starten
+Das in Step 1 zurückgelieferte Token ist Base-46 encoded und daher nicht wirklich gut lesbar. Aber zum Glück 
+gibt es mit *JWT.io* eine Web-Seite, die uns das Token im Klartext anzeigt.
 
-Starte die Anwendung, indem du die Anwendung und alle involvierten Services startest: 
+Einfach den Base-46 encoded Inhalt des Attributes *access_token* kopieren und in das Feld "ENCODED" der Web-Seite 
+einfügen - schon werden die verschiedenen Claim, wie z.B. *upn* oder *groups* lesbar. 
 
-``docker-compose up --build``
+###Step 3: Use-Cases aufrufen
 
-> Du möchtest wissen, was bei diesem Aufruf hinter den Kullisen passiert? Kein Problem, ein Blick in die zugehörige Docker-Compose Datei *docker-compose.yaml* hilft. 
+Im dritten und letzten Schritt der Übung sollen nun die verschiedenen Use-Cases mit der Tokens der unterschiedlichen 
+Nutzer bzw. Rollen aufgerufen werden. 
 
-###Step 1: Use-Cases aufrufen
+Der Aufruf der einzelnen Use-Cases erfolgt wie in den vorherigen Beispielen auch. Zusätzlich muss aber das JWT Token als 
+Header Information mit angegeben werden (am Beispiel "Liste aller Kunden"): 
 
-Rufe die einzelnen Use-Cases der Anwendung auf und versuche anhand der zugrhörigen Sourcen und Log-Ausgaben, die Aufrufe der Microservices untereinander nachzuvollziehen. 
-
-#### Use-Case "Alle Kunden abfragen" 
-
-``GET http://localhost:4000/customers``
-
-#### Use-Case "Details eines Kunden abfragen" 
-
-``GET http://localhost:4000/customers/{customerNumber}``
-
-#### Use-Case "Neuen Kunden anlegen" 
-
-	POST http://localhost:4000/customers
-	
-	{
-		"name":"Hans Dampf", 
-		
-	}
-
-#### Use-Case "Lieferadresse ändern" 
-
-	PUT http://localhost:4000/customers/0815/delivery-address
-
-	{
-		"city":"26122 Oldenburg",
-		"recipient":"Martha Dampf",
-		"street":
-			{
-				"name":"Postweg",
-				"number":"14"
-			}
-	}
-
-#### Use-Case "Rechnungsadresse ändern" 
-
-	PUT http://localhost:4000/customers/{customerNumber}/billing-address
-	
-	{
-		"city":"26122 Oldenburg",
-		"recipient":"Hans Dampf",
-		"street":
-			{
-				"name":"Postweg",
-				"number":"14"
-			}
-	}
+    GET http://localhost:4000/customers
+    
+    Headers: 
+        Authorization: Bearer <token>
+    
