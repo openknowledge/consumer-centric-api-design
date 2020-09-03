@@ -48,6 +48,7 @@ import de.openknowledge.sample.address.domain.City;
 public class AddressResource {
 
     private static final Logger LOGGER = Logger.getLogger(AddressResource.class.getSimpleName());
+    private static final int UNPROCESSABLE_ENTITY = 422;
     private static final String PROBLEM_JSON_TYPE = "application/problem+json";
     private static final String PROBLEM_JSON = "{\"type\": \"%s\", \"title\": \"%s\", \"status\": %d, \"detail\": \"%s\", \"instance\": \"%s\"}";
 
@@ -68,13 +69,13 @@ public class AddressResource {
             List<City> suggestions = addressesRepository.findSuggestions(address.getCity());
             LOGGER.fine(suggestions.size() + " suggestions found: " + suggestions);
             if (suggestions.size() == 1) {
-                return Response.status(Response.Status.BAD_REQUEST).type(PROBLEM_JSON_TYPE)
+                return Response.status(UNPROCESSABLE_ENTITY).type(PROBLEM_JSON_TYPE)
                         .entity(String.format(PROBLEM_JSON, type, "invalid city",
                                 Response.Status.BAD_REQUEST.getStatusCode(),
                                 "Did you mean " + suggestions.iterator().next() + "?", instance))
-                        .build();
+                        .build();   
             } else if (!suggestions.isEmpty()) {
-                return Response.status(Response.Status.BAD_REQUEST).type(PROBLEM_JSON_TYPE)
+                return Response.status(UNPROCESSABLE_ENTITY).type(PROBLEM_JSON_TYPE)
                         .entity(String.format(PROBLEM_JSON, type, "invalid city",
                                 Response.Status.BAD_REQUEST.getStatusCode(),
                                 "Did you mean one of "
@@ -82,7 +83,7 @@ public class AddressResource {
                                 instance))
                         .build();
             } else {
-                return Response.status(Response.Status.BAD_REQUEST).type(PROBLEM_JSON_TYPE)
+                return Response.status(UNPROCESSABLE_ENTITY).type(PROBLEM_JSON_TYPE)
                         .entity(String.format(PROBLEM_JSON, type, "invalid city",
                                 Response.Status.BAD_REQUEST.getStatusCode(), "no matching city found", instance))
                         .build();
