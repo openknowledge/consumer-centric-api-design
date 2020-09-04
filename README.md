@@ -13,28 +13,34 @@ Use-Cases unserer Anwendung zu beschränken.
 Zur Verwaltung der Nutzer verwenden wir *Keycloak*. Ein Zugriff auf den Keycloak-Server ist nach dessen Start über 
 dessen Admin-Console möglich:
                                                     
-    http://localhost:9090/auth/admin/
+    http://localhost:9191/auth/admin/
+    
     Username: admin
     Password: admin123 
 
-Folgende Nutzer sind initial neben dem Admin angelegt: 
+Folgende Nutzer sind initial bereits angelegt und können innerhalb unserer Anwendung verwendet werden:
+ 
+ * admin / admin123 (admin)
  * erika / erika123 (user)
  * max / max123 (user)
  * james / james123 (user)
  
-Während das Abfragen der Kundenliste für alle angemeldeten Nutzer erlaubt sein soll, dürfen nur Nutzer der Rolle *USER* 
-die Details einzelner Nutzer einsehen. Das Ändern von Liefer- und/oder Rechnungsadresse dagegen ist nur dem 
-jeweiligen Nutzer selbst gestattet.
-  
- ##ToDos
-
- In den folgenden Schritten wollen wir den Umgang mit JWT Tokens und der MicroProfile Autorisierung kennenlernen.  
-
- ###Step 1: JWT Token "organisieren"
+In der folgenden Übung wollen wir den Umgang mit JWT Tokens und der MicroProfile Autorisierung kennenlernen.  
  
- Zum Abrufen des JWT Tokens, verwenden wir Keycloak mit dem folgenden Request (am Beispiel 'erika'): 
+##ToDos
+
+Während das Abfragen der Kundenliste für alle angemeldeten Nutzer erlaubt sein soll, dürfen nur Nutzer der Rolle *user* 
+die Details einzelner Nutzer einsehen. Das Ändern von Liefer- und/oder Rechnungsadresse wiederum ist nur dem 
+jeweiligen Nutzer (Kunden) selbst gestattet. Und auf für das Anlegen einer neuen Kunden gibt es eine Sicherheits-Policy: 
+dies darf nur ein Nutzer der Rolle *admin*. 
  
-    POST http://localhost:9090/auth/realms/master/protocol/openid-connect/token
+>TIPP: Wie genau die Zugriffs-Policies implementiert werden, zeigt ein Blick in die Klasse *CustomerResource*. 
+ 
+###Step 1: JWT Token "organisieren"
+ 
+Zum Abrufen des JWT Tokens, verwenden wir Keycloak mit dem folgenden Request (am Beispiel 'erika'): 
+ 
+    POST http://localhost:9191/auth/realms/master/protocol/openid-connect/token
     
     Headers: 
         Content-Type: applicatiion/x-www-form-urlencoded
@@ -50,8 +56,8 @@ jeweiligen Nutzer selbst gestattet.
 Das in Step 1 zurückgelieferte Token ist Base-46 encoded und daher nicht wirklich gut lesbar. Aber zum Glück 
 gibt es mit *JWT.io* eine Web-Seite, die uns das Token im Klartext anzeigt.
 
-Einfach den Base-46 encoded Inhalt des Attributes *access_token* kopieren und in das Feld "ENCODED" der Web-Seite 
-einfügen - schon werden die verschiedenen Claim, wie z.B. *upn* oder *groups* lesbar. 
+Einfach den Base-46 encoded Inhalt des Attributes *access_token* in das Feld "ENCODED" der Web-Seite 
+einfügen - schon werden die verschiedenen Claims, wie z.B. *upn* oder *groups*, lesbar. 
 
 ###Step 3: Use-Cases aufrufen
 
@@ -66,3 +72,4 @@ Header Information mit angegeben werden (am Beispiel "Liste aller Kunden"):
     Headers: 
         Authorization: Bearer <token>
     
+>Was passiert, wenn du keinen Authorization Header angibst? Am besten einfach einmal ausprobieren.  
