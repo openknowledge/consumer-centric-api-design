@@ -1,5 +1,5 @@
-# Consumer Centric API Design
-Showcase to demonstrate various aspects of consumer centric API design.
+# Optimistic Locking with REST
+Showcase to demonstrate the implementation of optimistic locking with JAX-RS.
 
 ## Run via Docker
 Run
