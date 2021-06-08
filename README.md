@@ -1,5 +1,5 @@
-# Consumer Centric API Design
-Showcase to demonstrate various aspects of consumer centric API design.
+# Api Versioning
+Showcase to demonstrate the implementation of backward-compatible APIs and versioning
 
 ## Run via Docker
 Run
