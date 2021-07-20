@@ -1,7 +1,6 @@
-version: '3'
+version: "3"
 
 services:
-
   customer:
     build:
       context: ./customer-service
@@ -36,7 +35,7 @@ services:
       - "4003:8080"
 
   keycloak:
-    image: jboss/keycloak:11.0.0
+    image: jboss/keycloak:14.0.0
     container_name: keycloak
     environment:
       - KEYCLOAK_USER=admin
