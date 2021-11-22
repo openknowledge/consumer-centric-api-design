@@ -43,7 +43,7 @@ import org.eclipse.microprofile.openapi.annotations.servers.Server;
         license = @License(
                 name = "Apache License, Version 2.0",
                 url = "http://www.apache.org/licenses/LICENSE-2.0"),
-        version = "1",
+        version = "2",
         description = "A customer service"),
         servers = @Server(url = "http://localhost:8080/api"),
     components = @Components(requestBodies = @RequestBody(name = "Customer", content = @Content(schema = @Schema(implementation = CustomerResourceType.class)))))

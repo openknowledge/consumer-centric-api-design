@@ -45,7 +45,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import de.openknowledge.sample.customer.domain.Customer;
 import de.openknowledge.sample.customer.domain.CustomerNotFoundException;
 import de.openknowledge.sample.customer.domain.CustomerRepository;
-import de.openknowledge.sample.customer.domain.Name;
 
 /**
  * A resource that provides access to the {@link Customer} entity.
@@ -60,15 +59,13 @@ public class CustomerResource {
     private CustomerRepository repository;
 
     @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @RequestBody(name = "Customer", content = {
-            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomerResourceType.class)),
-    })
+    @Consumes({MediaType.APPLICATION_JSON, CustomMediaType.CUSTOMER_V1, CustomMediaType.CUSTOMER_V2})
+    @RequestBody(name = "Customer", content = @Content(mediaType = CustomMediaType.CUSTOMER_V2, schema = @Schema(implementation = CustomerResourceType.class)))
     public Response createCustomer(CustomerResourceType customer, @Context UriInfo uriInfo) {
         LOG.log(Level.INFO, "Create customer {0}", customer);
 
         Customer newCustomer = new Customer();
-        newCustomer.setName(new Name(customer.getFirstName(), customer.getLastName()));
+        newCustomer.setName(customer.getName());
         newCustomer.setEmailAddress(customer.getEmailAddress());
         newCustomer.setGender(customer.getGender());
 
@@ -100,7 +97,7 @@ public class CustomerResource {
 
     @GET
     @Path("/{id}")
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, CustomMediaType.CUSTOMER_V1, CustomMediaType.CUSTOMER_V2})
     public CustomerResourceType getCustomer(@PathParam("id") Long customerId) {
         LOG.log(Level.INFO, "Find customer with id {0}", customerId);
 
@@ -118,7 +115,7 @@ public class CustomerResource {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces({MediaType.APPLICATION_JSON, CustomMediaType.CUSTOMER_V1, CustomMediaType.CUSTOMER_V2})
     public List<CustomerResourceType> getCustomers() {
         LOG.info("Find all customers");
 
@@ -132,17 +129,15 @@ public class CustomerResource {
 
     @PUT
     @Path("/{id}")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @RequestBody(name = "Customer", content = {
-            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = CustomerResourceType.class))
-    })
+    @Consumes({MediaType.APPLICATION_JSON, CustomMediaType.CUSTOMER_V1, CustomMediaType.CUSTOMER_V2})
+    @RequestBody(name = "Customer", content = @Content(mediaType = CustomMediaType.CUSTOMER_V2, schema = @Schema(implementation = CustomerResourceType.class)))
     public Response updateCustomer(@PathParam("id") Long customerId, CustomerResourceType modifiedCustomer) {
         LOG.log(Level.INFO, "Update customer with id {0}", customerId);
 
         try {
             Customer foundCustomer = repository.find(customerId);
 
-            foundCustomer.setName(new Name(modifiedCustomer.getFirstName(), modifiedCustomer.getLastName()));
+            foundCustomer.setName(modifiedCustomer.getName());
             foundCustomer.setEmailAddress(modifiedCustomer.getEmailAddress());
             foundCustomer.setGender(modifiedCustomer.getGender());
 
