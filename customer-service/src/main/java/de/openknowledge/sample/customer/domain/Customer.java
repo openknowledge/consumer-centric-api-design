@@ -28,6 +28,8 @@ public class Customer {
 
     private Gender gender;
 
+    private CustomerStatus status = CustomerStatus.CREATED;
+
     public Long getId() {
         return id;
     }
@@ -58,5 +60,13 @@ public class Customer {
 
     public void setGender(Gender gender) {
         this.gender = gender;
+    }
+
+    public CustomerStatus getStatus() {
+    	return status;
+    }
+
+    public void setStatus(CustomerStatus status) {
+    	this.status = status;
     }
 }

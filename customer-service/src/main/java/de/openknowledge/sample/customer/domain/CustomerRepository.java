@@ -77,4 +77,12 @@ public class CustomerRepository implements Serializable {
         create(customer);
         return customer;
     }
+
+	public CustomerStatus findStatus(Long customerId) {
+		return find(customerId).getStatus();
+	}
+
+	public void updateStatus(Long customerId, CustomerStatus status) {
+		find(customerId).setStatus(status);
+	}
 }

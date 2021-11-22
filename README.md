@@ -1,5 +1,5 @@
-# Optimistic Locking with REST
-Showcase to demonstrate the implementation of optimistic locking with JAX-RS.
+# Long Polling with REST
+Showcase to demonstrate the implementation of long-polling  with JAX-RS.
 
 ## Run via Docker
 Run
